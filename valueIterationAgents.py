@@ -42,10 +42,11 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
 
         #"*** YOUR CODE STARTS HERE ***"
-
         qvalue = 0
+
         for nextState, prob in self.mdp.getTransitionStatesAndProbs(state,action):
           qvalue += prob * (self.mdp.getReward(state, action, nextState) + (self.discount * self.values[nextState]))
+
         return qvalue
 
         util.raiseNotDefined()
@@ -54,8 +55,6 @@ class ValueIterationAgent(ValueEstimationAgent):
           This function is later used in doValueIteration and computeActionFromValues
           So we declare it beforehand
         """
-
-
         #"*** YOUR CODE FINISHES HERE ***"
 
         return qvalue
