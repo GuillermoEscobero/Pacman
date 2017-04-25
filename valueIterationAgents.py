@@ -43,6 +43,11 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         #"*** YOUR CODE STARTS HERE ***"
 
+        qvalue = 0
+        for nextState, prob in self.mdp.getTransitionStatesAndProbs(state,action):
+          qvalue += prob * (self.mdp.getReward(state, action, nextState) + (self.discount * self.values[nextState]))
+        return qvalue
+
         util.raiseNotDefined()
 
         """
@@ -52,9 +57,9 @@ class ValueIterationAgent(ValueEstimationAgent):
 
 
         #"*** YOUR CODE FINISHES HERE ***"
-        
+
         return qvalue
-    
+
 
     def doValueIteration (self):
         # Write value iteration code here
@@ -70,11 +75,11 @@ class ValueIterationAgent(ValueEstimationAgent):
         # At the end it should show in the terminal the number of states considered in self.values and
         # the Delta between the last two iterations
 
-        
+
 
         util.raiseNotDefined()
         #"*** YOUR CODE FINISHES HERE ***"
-        
+
     def setMdp( self, mdp):
         """
           Set an mdp.
@@ -93,14 +98,14 @@ class ValueIterationAgent(ValueEstimationAgent):
           Set a number of iterations
         """
         self.iterations = iterations
-       
-       
+
+
     def getValue(self, state):
         """
           Return the value of the state
         """
         return self.values[state]
-        
+
 
 
     def showPolicy( self ):
@@ -108,7 +113,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
           Print the policy
         """
-        
+
         states = self.mdp.getStates()
         for state in states:
             print "Policy\n", state, self.getPolicy(state)
@@ -138,17 +143,16 @@ class ValueIterationAgent(ValueEstimationAgent):
         "Returns the policy at the state (no exploration)."
         return self.getAction(state)
 
-    
+
     def getQValue(self, state, action):
-        "Returns the Q value."        
+        "Returns the Q value."
         return self.computeQValueFromValues(state, action)
 
     def getPartialPolicy(self, stateL):
-        "Returns the partial policy at the state. Random for unkown states"        
+        "Returns the partial policy at the state. Random for unkown states"
         state,state_names = self.mdp.stateToHigh(stateL)
         if self.mdp.isKnownState(state):
             return self.computeActionFromValues(state)
         else:
             # random action
-            return util.random.choice(stateL.getLegalActions()) 
-
+            return util.random.choice(stateL.getLegalActions())
