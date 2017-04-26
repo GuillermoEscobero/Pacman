@@ -44,12 +44,10 @@ class ValueIterationAgent(ValueEstimationAgent):
         #"*** YOUR CODE STARTS HERE ***"
         qvalue = 0
 
-        for nextState, prob in self.mdp.getTransitionStatesAndProbs(state,action):
+        for nextState, prob in self.mdp.getTransitionStatesAndProbabilities(state, action):
           qvalue += prob * (self.mdp.getReward(state, action, nextState) + (self.discount * self.values[nextState]))
 
-        return qvalue
-
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
 
         """
           This function is later used in doValueIteration and computeActionFromValues
@@ -74,9 +72,20 @@ class ValueIterationAgent(ValueEstimationAgent):
         # At the end it should show in the terminal the number of states considered in self.values and
         # the Delta between the last two iterations
 
+        for _ in range(0, self.iterations):
+          tmpValues = util.Counter()
+          for state in self.mdp.getStates():
+            if self.mdp.isTerminal(state):
+              tmpValues[state] = 0
+            else:
+              maxvalue = float("-inf")
+              for action in self.mdp.getPossibleActions(state):
+                qvalue = self.computeQValueFromValues(state, action)
+                maxvalue = max(qvalue, maxvalue)
+                tmpValues[state] = maxvalue
+          self.values = tmpValues
 
-
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
         #"*** YOUR CODE FINISHES HERE ***"
 
     def setMdp( self, mdp):
@@ -129,8 +138,20 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
 
         #"*** YOUR CODE STARTS HERE ***"
+        if self.mdp.isTerminal(state):
+          return None
 
-        util.raiseNotDefined()
+        maxvalue = float("-inf")
+        policy = None
+
+        for action in self.mdp.getPossibleActions(state):
+          aux = self.computeQValueFromValues(state, action)
+          if aux>=maxvalue:
+            maxvalue = aux
+            policy = action
+        return policy
+
+        #util.raiseNotDefined()
 
         #"*** YOUR CODE FINISHES HERE ***"
 
