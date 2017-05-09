@@ -23,7 +23,7 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
         # We set this to true to print the MDP in the first call of the ValueIteration
         self.printMdpTable=True
         self.transitionTableFile=transitionTableFile
-        
+
         # Feature extractor
         self.featExtractor = util.lookup(extractor, globals())()
 
@@ -36,14 +36,13 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
 
         # Transition function (data structure required for the transition function)
         #*** YOUR CODE STARTS HERE ***"
-        
+
         # This variable MUST be used to reference your transition table so
         # it can be saved and loaded from file
 
-        self.transitionTable=None
-        
-        #"*** YOUR CODE FINISHES HERE ***"
+        self.transitionTable = util.Counter()
 
+        #"*** YOUR CODE FINISHES HERE ***"
 
         # Dictionary with examples of a Low state for each High state: it serves to get possible actions
         # and to check terminal states (though it is not required if the high level representation
@@ -59,12 +58,12 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
           is terminal, based on the situation. Current rule is that: if either X position for the
           pacman agent is "None", or X position for the closest food is "None", we are in a terminal
           state. This function is used in getTransitionStatesAndProbabilities.
-          
+
           We assume that the featuresTuple contains that information in positions 0 and 2
         """
         countNone = [i for i,x in enumerate(featuresTuple) if i in checkIndices and x==None]
         return (len(countNone)>0)
-    
+
     def stateToHigh(self, stateMap):
         """
           Returns the high level representation of an state
@@ -72,10 +71,10 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
           First extracts all the calculated features and then filters them
           keeping only the ones provided as parameter. Also sorts features
           so they are retrieved in the provided order.
-          
+
           Features non existent (for instance if ghosts are not present) are skipped
           Note that isTerminalFeatures expects to have "posX" and "FoodX" in particular positions
-          
+
           Returns two tuples: tuple of features and tuple of the features names.
 
           Features must be loaded in the self.stateFeatures variable
@@ -93,14 +92,14 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
 
         # Gets all features
         fullState_values,fullState_names = self.featExtractor.getFeatures(stateMap)
-        
+
         # Skip features not present in the complete list even if selected
         state_names=tuple (n for n in self.stateFeatures if n in fullState_names)
         state=tuple (fullState_values[fullState_names.index(n)] for n in state_names)
 
-        
+
         return state,state_names
-    
+
     def addStateLow(self, stateH, stateMap):
         """
           Adds a new pair stateH stateL to the dictionary of states
@@ -113,34 +112,41 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
         else:
             self.reward[stateH][0] += 1
             self.reward[stateH][1].append(stateMap.getScore())
-            
 
-    def updateTransitionFunction(self, initialMap, action, nextMap):    
+
+    def updateTransitionFunction(self, initialMap, action, nextMap):
         """
           Updates the transition function with a new case stateL, action, nextStateL
-          
+
           The states received as parameters have a low level representation. The transition function
           should be stored over the high level (simplified) representation
 
         """
         # Change the representation to the simplified one
-        
+
         # Some of these features will not be present in the state if there are no ghosts
         state,state_names=self.stateToHigh(initialMap)
         nextstate,nextstate_names=self.stateToHigh(nextMap)
-        
+
         # Set the start state in the first call
         if len(self.states.keys())== 0:
             self.setStartState(state)
         # Add the received states to self.states
         self.addStateLow(state, initialMap)
         self.addStateLow(nextstate, nextMap)
-
+	
 
         #"*** YOUR CODE STARTS HERE ***"
-
-        util.raiseNotDefined()
+	if self.getTransitionTable()[state, action] == 0:
+		self.transitionTable[state, action] = util.Counter()
         
+	if nextstate not in self.getTransitionTable()[state, action]:
+		self.transitionTable[state, action][nextstate] = 1
+	else:
+		self.transitionTable[state, action][nextstate] += 1
+
+	#util.raiseNotDefined()
+
         #"*** YOUR CODE FINISHES HERE ***"
 
     def getPossibleActions(self, state):
@@ -169,7 +175,7 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
 
     def getAverageReward(self, state):
         """
-        Return average rewards of the known low level states represented by a high level state 
+        Return average rewards of the known low level states represented by a high level state
         """
         return sum(i for i in  self.reward[state][1])/self.reward[state][0]
 
@@ -208,11 +214,11 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
         for state in sorted(self.states.keys()):
             for action in self.getPossibleActions(state):
                 print state, action, self.getTransitionStatesAndProbabilities(state, action)
-        
-    
+
+
     def setTransitionTableFile ( self , filename):
         self.transitionTableFile = filename
-    
+
     def getTransitionTable (self ):
         return self.transitionTable
 
@@ -224,8 +230,8 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
             trainInfo = {'states' : self.states,
                          'reward' : self.reward,
                          'transitionTable' : self.transitionTable}
-    
-    
+
+
             pickle.dump(trainInfo,open(self.transitionTableFile,'wb'))
             print " MDP transition table saved to file ", self.transitionTableFile
 
@@ -239,8 +245,8 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
                 print " MDP transition table loaded from file ", self.transitionTableFile
 #        else:
 #            print " WARNING: MDP transition table file not found. Creating a new table in " , self.transitionTableFile
-    
-    
+
+
     def getTransitionStatesAndProbabilities(self, state, action):
         """
         Returns list of (nextState, prob) pairs
@@ -248,8 +254,8 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
         from 'state' by taking 'action' along
         with their transition probabilities.
         """
-            
-        
+
+
         if self.printMdpTable:
             self.printMdpTable=False
             print
@@ -257,7 +263,7 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
             self.printMdp()
             print " End of MDP transition table"
             print
-            
+
         if action not in self.getPossibleActions(state):
             raise "Illegal action!"
 
@@ -267,12 +273,17 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
         successors = []
 
         #"*** YOUR CODE STARTS HERE ***"
+	frequency = 0
+	
+	for nextstate in self.getTransitionTable()[state, action]:
+		frequency += self.getTransitionTable()[state, action][nextstate]
 
-        util.raiseNotDefined()
+	for nextstate in self.getTransitionTable()[state, action]:
+		prob = self.getTransitionTable()[state, action][nextstate]/frequency
+		successors.append((nextstate, prob))
 
-        #"*** YOUR CODE FINISHES HERE ***"
+	#util.raiseNotDefined()
 
-        return successors
+	#"*** YOUR CODE FINISHES HERE ***"
 
-
-
+	return successors
