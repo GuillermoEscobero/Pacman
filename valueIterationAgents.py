@@ -85,6 +85,8 @@ class ValueIterationAgent(ValueEstimationAgent):
                 maxvalue = max(qvalue, maxvalue)
                 tmpValues[state] = maxvalue
           self.values = tmpValues
+        
+        print "States considered: ",len(self.values)
 
         #util.raiseNotDefined()
         #"*** YOUR CODE FINISHES HERE ***"
